@@ -75,7 +75,7 @@ public class JavaDocReporter {
 
     private static void export(Writer writer, MethodDoc doc) throws Exception {
         String name = doc.name();
-        writer.write("\n<pre><code>" + doc.getRawCommentText());
+        writer.write("\n<pre><code>");
         String comment = doc.getRawCommentText();
         if (!comment.isEmpty()) {
             writer.write(comment + "\n");
