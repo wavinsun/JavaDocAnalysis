@@ -1,0 +1,6 @@
+{
+  "src": [
+    "src/main/java"
+  ],
+  "doc": "javadoc.md"
+}
