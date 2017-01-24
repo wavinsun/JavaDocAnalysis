@@ -1,8 +1,8 @@
 package cn.mutils.app.javadoc;
 
+import cn.mutils.app.javadoc.model.ClassDocInfo;
 import cn.mutils.app.javadoc.util.FileUtil;
 import com.alibaba.fastjson.JSON;
-import com.sun.javadoc.ClassDoc;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class JavaDocAnalysis {
 
-    protected static List<ClassDoc> sClassDocList = new ArrayList<ClassDoc>();
+    protected static List<ClassDocInfo> sClassDocInfoList = new ArrayList<ClassDocInfo>();
 
     public static void main(String[] args) {
         JavaDocConfig config = new JavaDocConfig();
@@ -25,7 +25,7 @@ public class JavaDocAnalysis {
             config = JSON.parseObject(jsonText, JavaDocConfig.class);
         }
         JavaDocParser.parse(config);
-        new JavaDocReporter(sClassDocList).report(config.doc);
+        new JavaDocReporter(sClassDocInfoList).report(config.doc);
     }
 
 }

@@ -1,8 +1,9 @@
 package cn.mutils.app.javadoc;
 
-import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.Doclet;
-import com.sun.javadoc.RootDoc;
+import cn.mutils.app.javadoc.model.ClassDocInfo;
+import cn.mutils.app.javadoc.model.FieldDocInfo;
+import cn.mutils.app.javadoc.model.MethodDocInfo;
+import com.sun.javadoc.*;
 import com.sun.tools.javadoc.Main;
 
 import java.io.File;
@@ -40,11 +41,56 @@ public class JavaDocParser extends Doclet {
         }
     }
 
+    /**
+     * 覆盖基类方法
+     *
+     * @param rootDoc doc
+     * @return
+     */
     public static boolean start(RootDoc rootDoc) {
         for (ClassDoc classDoc : rootDoc.classes()) {
-            JavaDocAnalysis.sClassDocList.add(classDoc);
+            ClassDocInfo classDocInfo = new ClassDocInfo();
+            classDocInfo.name = classDoc.qualifiedName();
+            classDocInfo.simpleName = classDoc.typeName();
+            classDocInfo.packageName = classDoc.containingPackage().name();
+            classDocInfo.comment = classDoc.getRawCommentText();
+            for (FieldDoc fieldDoc : classDoc.fields()) {
+                if (!fieldDoc.isFinal() || !fieldDoc.isStatic()) {
+                    continue;
+                }
+                FieldDocInfo fieldDocInfo = new FieldDocInfo();
+                fieldDocInfo.name = fieldDoc.name();
+                fieldDocInfo.type = fieldDoc.type().typeName();
+                fieldDocInfo.comment = fieldDoc.getRawCommentText();
+                classDocInfo.fields.add(fieldDocInfo);
+            }
+            for (MethodDoc methodDoc : classDoc.methods()) {
+                MethodDocInfo methodDocInfo = new MethodDocInfo();
+                methodDocInfo.name = methodDoc.name();
+                methodDocInfo.comment = methodDoc.getRawCommentText();
+                methodDocInfo.parameters = getMethodParameters(methodDoc);
+                classDocInfo.methods.add(methodDocInfo);
+            }
+            JavaDocAnalysis.sClassDocInfoList.add(classDocInfo);
         }
         return false;
+    }
+
+    private static String getMethodParameters(MethodDoc methodDoc) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        Parameter[] parameters = methodDoc.parameters();
+        for (int i = 0, length = parameters.length; i < length; i++) {
+            Parameter parameter = parameters[i];
+            sb.append(parameter.type().typeName());
+            sb.append(" ");
+            sb.append(parameter.name());
+            if (i != length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(")");
+        return sb.toString();
     }
 
 }
