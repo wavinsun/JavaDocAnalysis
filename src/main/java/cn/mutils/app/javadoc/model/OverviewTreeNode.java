@@ -8,7 +8,10 @@ import java.util.List;
  */
 public class OverviewTreeNode {
 
+    public int id;
     public String name = "";
+    public String title = "";
+    public String comment = "";
     public OverviewTreeNode parent;
     public List<OverviewTreeNode> children = new ArrayList<OverviewTreeNode>();
 
@@ -47,6 +50,15 @@ public class OverviewTreeNode {
             node = node.parent;
         }
         return parentList.toArray(new OverviewTreeNode[parentList.size()]);
+    }
+
+    public int resetAllIds(int startId) {
+        this.id = startId + 1;
+        int end = this.id;
+        for (OverviewTreeNode child : this.children) {
+            end = child.resetAllIds(end);
+        }
+        return end;
     }
 
 }

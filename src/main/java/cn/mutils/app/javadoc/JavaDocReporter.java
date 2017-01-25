@@ -50,6 +50,7 @@ public class JavaDocReporter {
             buildOverviewTreeClass(classDocInfo);
             packageName = classDocInfo.packageName;
         }
+        mOverviewTreeNodeRoot.resetAllIds(-1);
     }
 
     private void buildOverviewTreePackage(String packageName, Map<String, Object> packageScannedMap) {
@@ -85,6 +86,7 @@ public class JavaDocReporter {
             }
             mOverviewTreeNodeMap.put(package4i, overviewTreeNode);
             overviewTreeNode.name += packageElements[i];
+            overviewTreeNode.title = package4i;
         }
     }
 
@@ -94,19 +96,18 @@ public class JavaDocReporter {
         if (nodeParent == null) {
             return;
         }
-        String name = classDocInfo.simpleName;
-        if (!classDocInfo.comment.isEmpty() && classDocInfo.comment.length() < 20) {
+        OverviewTreeNode node = new OverviewTreeNode(classDocInfo.simpleName, nodeParent);
+        if (!classDocInfo.comment.isEmpty() && classDocInfo.comment.length() < 25) {
             if (classDocInfo.comment.indexOf('<') == -1 && classDocInfo.comment.indexOf('>') == -1) {
                 if (isSingleLine(classDocInfo.comment)) {
-                    name += " " + classDocInfo.comment.replace("\n", "");
+                    node.comment = " " + classDocInfo.comment.replace("\n", "");
                 }
             }
         }
-        OverviewTreeNode node = new OverviewTreeNode(name, nodeParent);
+        node.title = classDocInfo.name;
         nodeParent.children.add(node);
         mOverviewTreeNodeMap.put(classDocInfo.name, node);
     }
-
 
     private void buildPackageTree() {
         mPackageTreeNodeRoot = new PackageTreeNode();
@@ -171,9 +172,9 @@ public class JavaDocReporter {
     }
 
     private void exportTree(Writer writer) throws Exception {
-        writer.write("## Overview ##\n<pre><code>");
+        writer.write("## Overview ##\n<pre>\n");
         exportTree(writer, mOverviewTreeNodeRoot);
-        writer.write("</pre></code>\n");
+        writer.write("</pre>\n");
     }
 
     private void exportTree(Writer writer, OverviewTreeNode node) throws Exception {
@@ -195,11 +196,15 @@ public class JavaDocReporter {
             } else {
                 writer.write("├──");
             }
-            writer.write(" ");
+            writer.write(" <a href=\"#id" + node.id + "\" title=\"" + node.title + "\">");
             if (node.isPackage()) {
-                writer.write("<b>" + node.name.replace("_", "\\_") + "</b>");
+                writer.write("<b>" + node.name + "</b>");
             } else {
-                writer.write(node.name.replace("_", "\\_"));
+                writer.write(node.name);
+            }
+            writer.write("</a>");
+            if (!node.comment.isEmpty()) {
+                writer.write(node.comment);
             }
             writer.write("\n");
         }
@@ -237,7 +242,7 @@ public class JavaDocReporter {
         }
     }
 
-    private static void export(Writer writer, ClassDocInfo doc, String lastPackage) throws Exception {
+    private void export(Writer writer, ClassDocInfo doc, String lastPackage) throws Exception {
         System.out.println("export class " + doc.name + " ...");
         boolean isNewPackage = !doc.packageName.equals(lastPackage);
         if (isNewPackage) {
@@ -245,10 +250,14 @@ public class JavaDocReporter {
             if (packageName.isEmpty()) {
                 packageName = "(default)";
             } else {
+                OverviewTreeNode node = mOverviewTreeNodeMap.get(doc.packageName);
+                writer.write("\n<a name=\"id" + node.id + "\"></a>\n");
                 packageName = packageName.replace("_", "\\_");
             }
             writer.write("\n## " + packageName + " ##\n");
         }
+        OverviewTreeNode node = mOverviewTreeNodeMap.get(doc.name);
+        writer.write("\n<a name=\"id" + node.id + "\"></a>\n");
         writer.write("\n### " + doc.simpleName.replace("_", "\\_") + " ###\n");
         if (!doc.comment.isEmpty()) {
             writer.write("\n" + transformComment(doc.comment) + "\n");
