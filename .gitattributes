@@ -1,0 +1,4 @@
+gradlew linguist-language=Java
+gradlew.bat linguist-language=Java
+javadoc.sh linguist-language=Java
+javadoc.bat linguist-language=Java
