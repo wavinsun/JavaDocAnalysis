@@ -97,10 +97,11 @@ public class JavaDocReporter {
             return;
         }
         OverviewTreeNode node = new OverviewTreeNode(classDocInfo.simpleName, nodeParent);
-        if (!classDocInfo.comment.isEmpty() && classDocInfo.comment.length() < 25) {
-            if (classDocInfo.comment.indexOf('<') == -1 && classDocInfo.comment.indexOf('>') == -1) {
-                if (isSingleLine(classDocInfo.comment)) {
-                    node.comment = " " + classDocInfo.comment.replace("\n", "");
+        if (!classDocInfo.comment.isEmpty()) {
+            String lineTitle = getFirstLineForTitle(classDocInfo.comment);
+            if (lineTitle != null && lineTitle.length() < 25) {
+                if (lineTitle.indexOf('<') == -1 && lineTitle.indexOf('>') == -1) {
+                    node.comment = " " + lineTitle;
                 }
             }
         }
@@ -224,21 +225,26 @@ public class JavaDocReporter {
         return sb.toString();
     }
 
-    private static boolean isSingleLine(String string) {
+    private static String getFirstLineForTitle(String string) {
         if (string == null) {
-            return true;
+            return null;
         }
         if (string.isEmpty()) {
-            return true;
+            return null;
         }
-        int firstLastIndexOfLine = string.lastIndexOf('\n');
-        if (firstLastIndexOfLine == -1) {
-            return true;
+        int firstIndexOfLine = string.indexOf('\n');
+        if (firstIndexOfLine == -1) {
+            return string;
         } else {
-            if (firstLastIndexOfLine != string.length() - 1) {
-                return false;
+            int secondIndexOfLine = string.indexOf('\n', firstIndexOfLine + 1);
+            if (secondIndexOfLine == -1) {
+                return string.substring(0, firstIndexOfLine);
             }
-            return string.lastIndexOf('\n', string.length() - 2) == -1;
+            String secondLine = string.substring(firstIndexOfLine + 1, secondIndexOfLine);
+            if (secondLine.length() == 0) {
+                return string.substring(0, firstIndexOfLine);
+            }
+            return null;
         }
     }
 

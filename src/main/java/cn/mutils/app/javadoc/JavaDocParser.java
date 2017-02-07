@@ -7,20 +7,22 @@ import com.sun.javadoc.*;
 import com.sun.tools.javadoc.Main;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 解析器
  */
 public class JavaDocParser extends Doclet {
 
-    public static void parse(JavaDocConfig config) {
-        if (config == null || config.src == null) {
-            System.err.println("src directory is null");
-            System.exit(-1);
-        }
+    protected static List<ClassDocInfo> sClassDocInfoList = new ArrayList<ClassDocInfo>();
+
+    public static List<ClassDocInfo> parse(JavaDocConfig config) {
+        sClassDocInfoList.clear();
         for (String dir : config.src) {
             travelSource(new File(dir));
         }
+        return sClassDocInfoList;
     }
 
     private static void travelSource(File file) {
@@ -71,7 +73,7 @@ public class JavaDocParser extends Doclet {
                 methodDocInfo.parameters = getMethodParameters(methodDoc);
                 classDocInfo.methods.add(methodDocInfo);
             }
-            JavaDocAnalysis.sClassDocInfoList.add(classDocInfo);
+            sClassDocInfoList.add(classDocInfo);
         }
         return false;
     }
