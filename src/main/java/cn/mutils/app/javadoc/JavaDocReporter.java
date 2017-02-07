@@ -299,16 +299,39 @@ public class JavaDocReporter {
     private static String transformComment(String comment) {
         StringBuilder sb = new StringBuilder();
         String[] lines = comment.split("\n");
+        boolean isPreStatement = false;
+        boolean isCodeStatement = false;
         for (int i = 0, length = lines.length; i < length; i++) {
             String line = lines[i];
             line = line.replace("<U>", "");
             line = line.replace("</U>", "");
             line = line.replace("<S>", "");
             line = line.replace("</S>", "");
+            int indexOfPreBegin = line.lastIndexOf("<pre>");
+            int indexOfPreEnd = line.lastIndexOf("</pre>");
+            int indexOfCodeBegin = line.lastIndexOf("<code>");
+            int indexOfCodeEnd = line.lastIndexOf("</code>");
+            if (indexOfPreEnd != -1 && indexOfPreEnd > indexOfPreBegin) {
+                isPreStatement = false;
+            } else {
+                if (indexOfPreBegin != -1 && indexOfPreBegin > indexOfPreEnd) {
+                    isPreStatement = true;
+                }
+            }
+            if (indexOfCodeEnd != -1 && indexOfCodeEnd > indexOfCodeBegin) {
+                isCodeStatement = false;
+            } else {
+                if (indexOfCodeBegin != -1 && indexOfCodeBegin > indexOfCodeEnd) {
+                    isCodeStatement = true;
+                }
+            }
             sb.append("> ");
             sb.append(line);
             if (i != length - 1) {
-                sb.append("<br/>\n");
+                if (!isPreStatement && !isCodeStatement) {
+                    sb.append("<br/>");
+                }
+                sb.append("\n");
             }
         }
         return sb.toString();
