@@ -244,6 +244,9 @@ public class JavaDocReporter {
             if (secondLine.length() == 0) {
                 return string.substring(0, firstIndexOfLine);
             }
+            if (secondLine.equals(" <p>")) {
+                return string.substring(0, firstIndexOfLine);
+            }
             return null;
         }
     }
